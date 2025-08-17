@@ -1,12 +1,18 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { hints } from "./hints";
 import { colors } from "./colors";
 import { solution } from "./solution";
 
 export default function App() {
-  const size = 10;
+  const [size, setSize] = useState(10);
   const [life, setLife] = useState(3);
   const [grid, setGrid] = useState(
     Array(size)
@@ -14,11 +20,21 @@ export default function App() {
       .map(() => Array(size).fill(null))
   );
   const [mode, setMode] = useState("yes");
+
+  useEffect(() => {
+    setGrid(
+      Array(size)
+        .fill(null)
+        .map(() => Array(size).fill(null))
+    );
+    setLife(3);
+  }, [size]);
   useEffect(() => {
     if (life <= 0) {
       gameOver();
     }
   }, [life]);
+
   const cellTouch = (rowIndex, colIndex) => {
     setGrid((grid) => {
       if (
@@ -30,14 +46,14 @@ export default function App() {
       }
       const newGrid = grid.map((row) => [...row]);
       if (mode === "yes") {
-        if (solution[rowIndex][colIndex] === 1) {
+        if (solution[size][rowIndex][colIndex] === 1) {
           newGrid[rowIndex][colIndex] = "blue";
         } else {
           newGrid[rowIndex][colIndex] = "redDark";
           setLife((prevlife) => prevlife - 1);
         }
       } else {
-        if (solution[rowIndex][colIndex] === 0) {
+        if (solution[size][rowIndex][colIndex] === 0) {
           newGrid[rowIndex][colIndex] = "red";
         } else {
           newGrid[rowIndex][colIndex] = "blueDark";
@@ -54,8 +70,8 @@ export default function App() {
     setMode((prevMode) => (prevMode === "yes" ? "no" : "yes"));
   };
   const isGameClear = (grid) => {
-    for (let row = 0; row < 10; row++) {
-      for (let col = 0; col < 10; col++) {
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
         if (
           grid[row][col] === null ||
           grid[row][col] === undefined ||
@@ -66,6 +82,18 @@ export default function App() {
       }
     }
     return true;
+  };
+  const levelEasy = () => {
+    setSize(5);
+  };
+  const levelNormal = () => {
+    setSize(10);
+  };
+  const levelHard = () => {
+    setSize(15);
+  };
+  const levelSuparHard = () => {
+    setSize(30);
   };
   const gameClear = () => {
     alert("Congratulations! You have cleared the game!");
@@ -79,18 +107,15 @@ export default function App() {
         This is {size}X{size} NonoGram
       </Text>
       <StatusBar style="auto" />
-      <View>
+      <View style={{ alignItems: "center" }}>
         {/* 위 힌트 */}
         <View style={{ flexDirection: "row", marginLeft: 5 * size }}>
-          {hints.row.map((i, hintRowIndex) => (
-            <View
-              key={hintRowIndex}
-              style={[styles.hintRow, { width: 3 * size }]}
-            >
+          {hints[size].row.map((i, hintRowIndex) => (
+            <View key={hintRowIndex} style={styles.hintRow}>
               <View>
-                {hints.row[hintRowIndex].map((i, hintRowIndexIndex) => (
+                {hints[size].row[hintRowIndex].map((i, hintRowIndexIndex) => (
                   <Text key={hintRowIndexIndex}>
-                    {hints.row[hintRowIndex][hintRowIndexIndex]}
+                    {hints[size].row[hintRowIndex][hintRowIndexIndex]}
                   </Text>
                 ))}
               </View>
@@ -102,17 +127,22 @@ export default function App() {
           {/* 왼쪽 힌트 */}
           <View>
             <View>
-              {hints.col.map((i, hintColIndex) => (
+              {hints[size].col.map((i, hintColIndex) => (
                 <View
                   key={hintColIndex}
                   style={[styles.hintCol, { width: 5 * size }]}
                 >
                   <View style={{ flexDirection: "row" }}>
-                    {hints.col[hintColIndex].map((i, hintColIndexIndex) => (
-                      <Text key={hintColIndexIndex} style={{ marginRight: 3 }}>
-                        {hints.col[hintColIndex][hintColIndexIndex]}
-                      </Text>
-                    ))}
+                    {hints[size].col[hintColIndex].map(
+                      (i, hintColIndexIndex) => (
+                        <Text
+                          key={hintColIndexIndex}
+                          style={{ marginRight: 3 }}
+                        >
+                          {hints[size].col[hintColIndex][hintColIndexIndex]}
+                        </Text>
+                      )
+                    )}
                   </View>
                 </View>
               ))}
@@ -153,8 +183,30 @@ export default function App() {
             <Text style={{ textTransform: "uppercase" }}>{mode}</Text>
           </TouchableOpacity>
         </View>
-        <View>
+        <View style={{ alignSelf: "center" }}>
           <Text>Life Left : {life}</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            width: 300,
+            justifyContent: "space-between",
+            alignSelf: "center",
+          }}
+        >
+          <Text>Level : </Text>
+          <TouchableOpacity onPress={levelEasy}>
+            <Text>Easy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={levelNormal}>
+            <Text>Normal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={levelHard}>
+            <Text>Hard</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={levelSuparHard}>
+            <Text>SUPAR HARD</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -176,6 +228,7 @@ const styles = StyleSheet.create({
   },
   hintRow: {
     alignItems: "center",
+    width: 30,
   },
   hintCol: { height: 30, justifyContent: "center" },
   mode: {
