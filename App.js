@@ -1,24 +1,51 @@
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { hints } from "./hints";
 import { colors } from "./colors";
+import { solution } from "./solution";
 
 export default function App() {
   const size = 10;
+  const [life, setLife] = useState(3);
   const [grid, setGrid] = useState(
     Array(size)
       .fill(null)
       .map(() => Array(size).fill(null))
   );
   const [mode, setMode] = useState("yes");
+  useEffect(() => {
+    if (life <= 0) {
+      gameOver();
+    }
+  }, [life]);
   const cellTouch = (rowIndex, colIndex) => {
     setGrid((grid) => {
+      if (
+        grid[rowIndex][colIndex] !== "" &&
+        grid[rowIndex][colIndex] !== null &&
+        grid[rowIndex][colIndex] !== undefined
+      ) {
+        return grid;
+      }
       const newGrid = grid.map((row) => [...row]);
       if (mode === "yes") {
-        newGrid[rowIndex][colIndex] = "yes";
+        if (solution[rowIndex][colIndex] === 1) {
+          newGrid[rowIndex][colIndex] = "blue";
+        } else {
+          newGrid[rowIndex][colIndex] = "redDark";
+          setLife((prevlife) => prevlife - 1);
+        }
       } else {
-        newGrid[rowIndex][colIndex] = "no";
+        if (solution[rowIndex][colIndex] === 0) {
+          newGrid[rowIndex][colIndex] = "red";
+        } else {
+          newGrid[rowIndex][colIndex] = "blueDark";
+          setLife((prevlife) => prevlife - 1);
+        }
+      }
+      if (isGameClear(newGrid)) {
+        gameClear();
       }
       return newGrid;
     });
@@ -26,7 +53,26 @@ export default function App() {
   const modeChange = () => {
     setMode((prevMode) => (prevMode === "yes" ? "no" : "yes"));
   };
-
+  const isGameClear = (grid) => {
+    for (let row = 0; row < 10; row++) {
+      for (let col = 0; col < 10; col++) {
+        if (
+          grid[row][col] === null ||
+          grid[row][col] === undefined ||
+          grid[row][col] === ""
+        ) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  const gameClear = () => {
+    alert("Congratulations! You have cleared the game!");
+  };
+  const gameOver = () => {
+    alert("Game Over! Better luck next time!");
+  };
   return (
     <View style={styles.container}>
       <Text>
@@ -83,10 +129,14 @@ export default function App() {
                       styles.cell,
                       {
                         backgroundColor:
-                          cell === "yes"
+                          cell === "blue"
                             ? colors.blue
-                            : cell === "no"
+                            : cell === "blueDark"
+                            ? colors.blueDark
+                            : cell === "red"
                             ? colors.red
+                            : cell === "redDark"
+                            ? colors.redDark
                             : "#fff",
                       },
                     ]}
@@ -102,6 +152,9 @@ export default function App() {
           <TouchableOpacity onPress={modeChange}>
             <Text style={{ textTransform: "uppercase" }}>{mode}</Text>
           </TouchableOpacity>
+        </View>
+        <View>
+          <Text>Life Left : {life}</Text>
         </View>
       </View>
     </View>
