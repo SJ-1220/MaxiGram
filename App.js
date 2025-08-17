@@ -20,7 +20,11 @@ export default function App() {
       .map(() => Array(size).fill(null))
   );
   const [mode, setMode] = useState("yes");
-
+  const [endEasy, setEndEasy] = useState(false);
+  const [endNormal, setEndNormal] = useState(false);
+  const [endHard, setEndHard] = useState(false);
+  const [endExtraHard, setEndExtraHard] = useState(false);
+  const [modeEmoji, setModeEmoji] = useState("⭕");
   useEffect(() => {
     setGrid(
       Array(size)
@@ -34,7 +38,6 @@ export default function App() {
       gameOver();
     }
   }, [life]);
-
   const cellTouch = (rowIndex, colIndex) => {
     setGrid((grid) => {
       if (
@@ -68,6 +71,7 @@ export default function App() {
   };
   const modeChange = () => {
     setMode((prevMode) => (prevMode === "yes" ? "no" : "yes"));
+    setModeEmoji((prevEmoji) => (prevEmoji === "⭕" ? "❌" : "⭕"));
   };
   const isGameClear = (grid) => {
     for (let row = 0; row < size; row++) {
@@ -80,6 +84,18 @@ export default function App() {
           return false;
         }
       }
+    }
+    if (size === 5) {
+      setEndEasy(true);
+    }
+    if (size === 10) {
+      setEndNormal(true);
+    }
+    if (size === 15) {
+      setEndHard(true);
+    }
+    if (size === 30) {
+      setEndExtraHard(true);
     }
     return true;
   };
@@ -99,6 +115,12 @@ export default function App() {
     alert("Congratulations! You have cleared the game!");
   };
   const gameOver = () => {
+    setLife(3);
+    setGrid(
+      Array(size)
+        .fill(null)
+        .map(() => Array(size).fill(null))
+    );
     alert("Game Over! Better luck next time!");
   };
   return (
@@ -190,14 +212,46 @@ export default function App() {
       </ScrollView>
       {/* Footer */}
       <View style={styles.footer}>
-        <View style={styles.mode}>
+        <TouchableOpacity onPress={modeChange} style={styles.mode}>
           <Text style={{ marginRight: 5 }}>MODE :</Text>
-          <TouchableOpacity onPress={modeChange}>
-            <Text style={{ textTransform: "uppercase" }}>{mode}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ alignSelf: "center" }}>
-          <Text>Life Left : {life}</Text>
+          <View>
+            <Text>{modeEmoji}</Text>
+          </View>
+        </TouchableOpacity>
+        <View
+          style={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: 250,
+            alignSelf: "center",
+            flexDirection: "row",
+            marginBottom: 10,
+          }}
+        >
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: colors.red,
+            }}
+          />
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: life <= 1 ? "#000" : colors.red,
+            }}
+          />
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: life <= 2 ? "#000" : colors.red,
+            }}
+          />
         </View>
         <View
           style={{
@@ -207,17 +261,44 @@ export default function App() {
             alignSelf: "center",
           }}
         >
-          <Text>Level : </Text>
-          <TouchableOpacity onPress={levelEasy}>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endEasy ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelEasy}
+          >
             <Text>Easy</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={levelNormal}>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endNormal ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelNormal}
+          >
             <Text>Normal</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={levelHard}>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endHard ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelHard}
+          >
             <Text>Hard</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={levelSuparHard}>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endExtraHard ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelSuparHard}
+          >
             <Text>SUPAR HARD</Text>
           </TouchableOpacity>
         </View>
@@ -261,12 +342,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     flexDirection: "row",
+    marginBottom: 10,
   },
   footer: {
-    height: 100,
+    height: 170,
     backgroundColor: colors.blue,
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
+    paddingBottom: 30,
   },
 });
