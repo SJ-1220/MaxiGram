@@ -1,12 +1,18 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { hints } from "./hints";
 import { colors } from "./colors";
 import { solution } from "./solution";
 
 export default function App() {
-  const size = 10;
+  const [size, setSize] = useState(10);
   const [life, setLife] = useState(3);
   const [grid, setGrid] = useState(
     Array(size)
@@ -14,6 +20,19 @@ export default function App() {
       .map(() => Array(size).fill(null))
   );
   const [mode, setMode] = useState("yes");
+  const [endEasy, setEndEasy] = useState(false);
+  const [endNormal, setEndNormal] = useState(false);
+  const [endHard, setEndHard] = useState(false);
+  const [endExtraHard, setEndExtraHard] = useState(false);
+  const [modeEmoji, setModeEmoji] = useState("⭕");
+  useEffect(() => {
+    setGrid(
+      Array(size)
+        .fill(null)
+        .map(() => Array(size).fill(null))
+    );
+    setLife(3);
+  }, [size]);
   useEffect(() => {
     if (life <= 0) {
       gameOver();
@@ -30,14 +49,14 @@ export default function App() {
       }
       const newGrid = grid.map((row) => [...row]);
       if (mode === "yes") {
-        if (solution[rowIndex][colIndex] === 1) {
+        if (solution[size][rowIndex][colIndex] === 1) {
           newGrid[rowIndex][colIndex] = "blue";
         } else {
           newGrid[rowIndex][colIndex] = "redDark";
           setLife((prevlife) => prevlife - 1);
         }
       } else {
-        if (solution[rowIndex][colIndex] === 0) {
+        if (solution[size][rowIndex][colIndex] === 0) {
           newGrid[rowIndex][colIndex] = "red";
         } else {
           newGrid[rowIndex][colIndex] = "blueDark";
@@ -52,10 +71,11 @@ export default function App() {
   };
   const modeChange = () => {
     setMode((prevMode) => (prevMode === "yes" ? "no" : "yes"));
+    setModeEmoji((prevEmoji) => (prevEmoji === "⭕" ? "❌" : "⭕"));
   };
   const isGameClear = (grid) => {
-    for (let row = 0; row < 10; row++) {
-      for (let col = 0; col < 10; col++) {
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
         if (
           grid[row][col] === null ||
           grid[row][col] === undefined ||
@@ -65,32 +85,69 @@ export default function App() {
         }
       }
     }
+    if (size === 5) {
+      setEndEasy(true);
+    }
+    if (size === 10) {
+      setEndNormal(true);
+    }
+    if (size === 15) {
+      setEndHard(true);
+    }
+    if (size === 30) {
+      setEndExtraHard(true);
+    }
     return true;
+  };
+  const levelEasy = () => {
+    setSize(5);
+  };
+  const levelNormal = () => {
+    setSize(10);
+  };
+  const levelHard = () => {
+    setSize(15);
+  };
+  const levelSuparHard = () => {
+    setSize(30);
   };
   const gameClear = () => {
     alert("Congratulations! You have cleared the game!");
   };
   const gameOver = () => {
+    setLife(3);
+    setGrid(
+      Array(size)
+        .fill(null)
+        .map(() => Array(size).fill(null))
+    );
     alert("Game Over! Better luck next time!");
   };
   return (
     <View style={styles.container}>
-      <Text>
-        This is {size}X{size} NonoGram
-      </Text>
       <StatusBar style="auto" />
-      <View>
+      <View style={styles.header}>
+        <Text style={{ fontSize: 28, marginTop: 30 }}>
+          This is {size}X{size} MaxiGram
+        </Text>
+      </View>
+      {/* 전체 힌트와 표 */}
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        style={{ flex: 1 }}
+      >
         {/* 위 힌트 */}
         <View style={{ flexDirection: "row", marginLeft: 5 * size }}>
-          {hints.row.map((i, hintRowIndex) => (
-            <View
-              key={hintRowIndex}
-              style={[styles.hintRow, { width: 3 * size }]}
-            >
+          {hints[size].row.map((i, hintRowIndex) => (
+            <View key={hintRowIndex} style={styles.hintRow}>
               <View>
-                {hints.row[hintRowIndex].map((i, hintRowIndexIndex) => (
+                {hints[size].row[hintRowIndex].map((i, hintRowIndexIndex) => (
                   <Text key={hintRowIndexIndex}>
-                    {hints.row[hintRowIndex][hintRowIndexIndex]}
+                    {hints[size].row[hintRowIndex][hintRowIndexIndex]}
                   </Text>
                 ))}
               </View>
@@ -102,17 +159,22 @@ export default function App() {
           {/* 왼쪽 힌트 */}
           <View>
             <View>
-              {hints.col.map((i, hintColIndex) => (
+              {hints[size].col.map((i, hintColIndex) => (
                 <View
                   key={hintColIndex}
                   style={[styles.hintCol, { width: 5 * size }]}
                 >
                   <View style={{ flexDirection: "row" }}>
-                    {hints.col[hintColIndex].map((i, hintColIndexIndex) => (
-                      <Text key={hintColIndexIndex} style={{ marginRight: 3 }}>
-                        {hints.col[hintColIndex][hintColIndexIndex]}
-                      </Text>
-                    ))}
+                    {hints[size].col[hintColIndex].map(
+                      (i, hintColIndexIndex) => (
+                        <Text
+                          key={hintColIndexIndex}
+                          style={{ marginRight: 3 }}
+                        >
+                          {hints[size].col[hintColIndex][hintColIndexIndex]}
+                        </Text>
+                      )
+                    )}
                   </View>
                 </View>
               ))}
@@ -147,14 +209,98 @@ export default function App() {
             ))}
           </View>
         </View>
-        <View style={styles.mode}>
+      </ScrollView>
+      {/* Footer */}
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={modeChange} style={styles.mode}>
           <Text style={{ marginRight: 5 }}>MODE :</Text>
-          <TouchableOpacity onPress={modeChange}>
-            <Text style={{ textTransform: "uppercase" }}>{mode}</Text>
-          </TouchableOpacity>
+          <View>
+            <Text>{modeEmoji}</Text>
+          </View>
+        </TouchableOpacity>
+        <View
+          style={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: 250,
+            alignSelf: "center",
+            flexDirection: "row",
+            marginBottom: 10,
+          }}
+        >
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: colors.red,
+            }}
+          />
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: life <= 1 ? "#000" : colors.red,
+            }}
+          />
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 50,
+              backgroundColor: life <= 2 ? "#000" : colors.red,
+            }}
+          />
         </View>
-        <View>
-          <Text>Life Left : {life}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            width: 300,
+            justifyContent: "space-between",
+            alignSelf: "center",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endEasy ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelEasy}
+          >
+            <Text>Easy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endNormal ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelNormal}
+          >
+            <Text>Normal</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endHard ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelHard}
+          >
+            <Text>Hard</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              padding: 5,
+              backgroundColor: endExtraHard ? colors.yellow : "#fff",
+              borderRadius: 20,
+            }}
+            onPress={levelSuparHard}
+          >
+            <Text>SUPAR HARD</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -168,6 +314,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  header: {
+    height: 100,
+    backgroundColor: colors.red,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginBottom: 30,
+  },
   cell: {
     width: 30,
     height: 30,
@@ -176,6 +330,7 @@ const styles = StyleSheet.create({
   },
   hintRow: {
     alignItems: "center",
+    width: 30,
   },
   hintCol: { height: 30, justifyContent: "center" },
   mode: {
@@ -187,5 +342,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     flexDirection: "row",
+    marginBottom: 10,
+  },
+  footer: {
+    height: 170,
+    backgroundColor: colors.blue,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingBottom: 30,
   },
 });
