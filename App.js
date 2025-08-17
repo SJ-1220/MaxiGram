@@ -103,11 +103,21 @@ export default function App() {
   };
   return (
     <View style={styles.container}>
-      <Text>
-        This is {size}X{size} NonoGram
-      </Text>
       <StatusBar style="auto" />
-      <View style={{ alignItems: "center" }}>
+      <View style={styles.header}>
+        <Text style={{ fontSize: 28, marginTop: 30 }}>
+          This is {size}X{size} MaxiGram
+        </Text>
+      </View>
+      {/* 전체 힌트와 표 */}
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        style={{ flex: 1 }}
+      >
         {/* 위 힌트 */}
         <View style={{ flexDirection: "row", marginLeft: 5 * size }}>
           {hints[size].row.map((i, hintRowIndex) => (
@@ -177,6 +187,9 @@ export default function App() {
             ))}
           </View>
         </View>
+      </ScrollView>
+      {/* Footer */}
+      <View style={styles.footer}>
         <View style={styles.mode}>
           <Text style={{ marginRight: 5 }}>MODE :</Text>
           <TouchableOpacity onPress={modeChange}>
@@ -220,6 +233,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  header: {
+    height: 100,
+    backgroundColor: colors.red,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginBottom: 30,
+  },
   cell: {
     width: 30,
     height: 30,
@@ -240,5 +261,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     alignItems: "center",
     flexDirection: "row",
+  },
+  footer: {
+    height: 100,
+    backgroundColor: colors.blue,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
 });
