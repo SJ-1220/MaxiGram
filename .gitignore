@@ -5,9 +5,14 @@ node_modules/
 
 # Expo
 .expo/
+.expo-shared
 dist/
 web-build/
 expo-env.d.ts
+
+# Metro / cache
+.cache/
+.expo-cache/
 
 # Native
 .kotlin/
@@ -17,6 +22,9 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+
+# Google Services (Firebase configs)
+/google-services.json
 
 # Metro
 .metro-health-check*
@@ -35,3 +43,11 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# VSCode
+.vscode/
+
+# Firebase
+.firebase/
+.firebaserc
+.runtimeconfig.json
